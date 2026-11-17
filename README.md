@@ -1,44 +1,38 @@
 # auto-lectern (Horizon port)
 
-A Rust port of [Auto Lectern](https://github.com/capthehacker99/AutoLectern)
-(capthehacker99, CC-BY-NC-SA-4.0), which cycles librarian trades by breaking
-and replacing lecterns until an offered book matches your goal.
+An exact 1:1 Rust port of [Auto Lectern](https://github.com/capthehacker99/AutoLectern)
+(capthehacker99, CC-BY-NC-SA-4.0) for [Horizon](https://github.com/horizon-rust/horizon),
+which cycles librarian trades by breaking and replacing lecterns until an
+offered book matches your goal. The upstream license and credit carry with
+this port; see LICENSE.
 
-## Scope (1:1)
+## Scope (1:1, upstream sys.exe.al)
 
-The port lives in mixins/auto_lectern/runtime.rs, upstream's `sys.exe.al`
-package translated verbatim, with the game-touchpoint half compiled out under
-`--features standalone` so the logic tests run anywhere:
+- src/state.rs, src/goal.rs, src/auto_lectern.rs: ALState, ALGoal,
+  ALAutoTrade, DummyInput and the AutoLectern main class 1:1 (state cycle,
+  goal matching with upstream's -1 sentinel quirks, the vanilla price
+  helpers, autolec.txt config load/save).
+- src/commands_seam.rs: the commands package 1:1 (AutoLec's register tree,
+  ClientCommandManager with the CommandSyntaxException context-line
+  rendering, FakeCommandSource) plus the Brigadier surface it drives
+  (StringReader, literal/required argument builders, IntegerArgumentType,
+  RegistryEntryReferenceArgumentType with registry fall-through,
+  CommandDispatcher) as a same-shape seam.
+- src/mixins.rs: the mixin package 1:1 (ClientCommonNetworkHandler send
+  redirect with the rotation spoof, GameRenderer render head,
+  MinecraftClient tick/stop, ClientPlayerInteractionManager breaking hooks,
+  ClientPlayNetworkHandler: merchant screen open/close, command tree
+  update, entity-tracker librarian switch, item pickup animation, and the
+  full trade pipeline: findCheapestTrade, checkTrades, attemptLockTrade,
+  determineTrades, plus sendChatCommand/runClickEventCommand intercept).
+- Game-facing calls land behind the same seams upstream uses, injected so
+  the logic stays exact; src/seams.rs and src/dummy_input.rs carry the
+  seam surface and its test fakes.
 
-- Goals are upstream's ALGoal records: an enchantment id plus level and price
-  windows with -1 as the extreme-bound sentinel. The matcher keeps upstream's
-  quirks, including a -1 level minimum with a set maximum accepting only
-  level 1 or below, and a level maximum of -1 meaning "at the enchantment's
-  own max level".
-- The villager price helpers are upstream's: cheapest is maxLevel*3+2 and
-  dearest is maxLevel*3+2+(4+maxLevel*10), both doubled for the
-  double-trade-price tag and then capped at 64.
-- The config file is autolec.txt in upstream's exact format (load/save).
-- `/autolec` is upstream's AutoLec command tree verbatim: start, stop, sync
-  item, breakCooldown, autoTrade ENCHANT|CHEAPEST|OFF, log, preBreak,
-  preserveTool, autoRemove, add with enchantment+level+price subcommands,
-  clear, remove index or uuid with the Command Expired check, list, with
-  upstream's chat lines, the [REMOVE] click-run on list rows and the level
-  and price info renderers.
-- The tick loop is upstream's MinecraftTickHead state cycle 1:1: stopped,
-  stopping, starting, breaking, waiting-item, placing, waiting-prof,
-  interact-vil, waiting-trade, with upstream's 40-tick break cooldown and
-  5-tick interact cooldown, tool preservation and equipping, the goal-met
-  fanfare, and the autoRemove lectern removal.
-- The packet/trade layer is upstream's mixin behavior 1:1: findCheapestTrade
-  weights (paper cost x0.015625, book x0.146875), checkTrades log lines and
-  goal scan, attemptLockTrade's select-trade / click-slot / close packet
-  plan, determineTrades, the dig-delay zeroing and anti-block-breaking hold,
-  the rotation override the client sends instead of its real angles, the
-  keepalive while waiting for the villager, merchant screen capture and the
-  swallowed close, and the profession pick from the villager's tracked data.
+39 tests green.
 
-23 standalone tests green.
+The hnmod/ directory holds the earlier packaged bundle (phase 1) kept for
+the .hnmod packaging flow; the src/ crate is the source of truth.
 
 ## License
 

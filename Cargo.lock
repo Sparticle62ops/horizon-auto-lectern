@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "horizon-mod-auto-lectern"
-version = "1.0.0"
+name = "autolectern"
+version = "0.1.0"
