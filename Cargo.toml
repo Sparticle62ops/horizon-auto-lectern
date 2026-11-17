@@ -8,3 +8,7 @@ description = "Cycles librarian lectern trades by breaking and replacing lectern
 
 [lib]
 path = "mixins/auto_lectern/runtime.rs"
+
+# The standalone test build compiles the game-touchpoint half out.
+[features]
+standalone = []
