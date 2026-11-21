@@ -1,6 +1,6 @@
 id = "auto_lectern"
 name = "auto_lectern"
-version = "0.1.0"
+version = "1.0.0"
 description = """None"""
 authors = ["capthehacker99", "sparticle"]
 license = "CC-BY-NC-SA-4.0"
